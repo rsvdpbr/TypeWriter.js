@@ -1,0 +1,24 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="ja">
+<head>
+  <title>typewriter sample</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+  <script type="text/javascript" src="./typewriter.js"></script>
+  <script type="text/javascript">
+	window.onload = function(){
+	  var param = {
+	    'interval': 20,
+	    'onEnd': function(){ type.start(); }
+	  };
+	  type.add('type', 'JavaScript (sometimes abbreviated as JS) is a scripting language commonly implemented as part of a web browser in order to create enhanced user interfaces and dynamic websites. ', param);
+	  type.add('type', 'JavaScript is a pr /bk//bk//bk//bk//bk//bk//bk//bk//bk//bk//bk//bk//bk//bk//bk//bk//bk//bk//bk/ (from wikiped/wt/i/wt/a/wt//wt/)', {'autostart': false});
+	};
+  </script>
+</head>
+<body>
+  <div id="type">
+	TypeWriter> 
+  </div>
+</body>
+</html>
