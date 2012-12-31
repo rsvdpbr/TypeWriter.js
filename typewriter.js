@@ -84,7 +84,7 @@ var TypeWriter;
 							$('#'+node).append(chara);
 						}else{
 							var result = specialCharTable[chara]($('#'+node));
-							if(typeof result === 'undefined'){
+							if(typeof result !== 'undefined'){
 								$('#'+node).append(result);
 							}
 						}
