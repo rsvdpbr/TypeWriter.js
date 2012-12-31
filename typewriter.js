@@ -1,14 +1,17 @@
+'use strict';
 
-var type;
+var TypeWriter;
 
 (function(){
 
-	var specialSep = '/??/';
-	var backspace = '/bk/';
-	var wait = '/wt/';
 	var interval = 50;
+	var specialCharTable = {
+		'/bk/': function(node){	$(node).text($(node).text().slice(0, -1)); },
+		'/wt/': function(node){ return ''; },
+		'/sl/': function(node){ return '/'; }
+	};
 	
-	type = (function(){
+	TypeWriter = (function(){
 		var queue = [];
 		var obj = {};
 		obj.status = function(){ console.log(queue); };
@@ -27,7 +30,7 @@ var type;
 			}
 		};
 		obj.start = function(index){
-			if(typeof index === 'undefined') force = false;
+			if(typeof index === 'undefined') index = false;
 			var data = queue.pop();
 			var func = (function(){
 				var onEnd = data.onEnd;
@@ -35,20 +38,26 @@ var type;
 				var string = [];
 				var handler;
 				// string to array
-				for(var i=0,len=data.string.length; i<len; i++){
+				var regexp = /\/(.+?):?([0-9]+)?\//g;
+				var i, index, len;
+				var specialChars = {};
+				while(i = regexp.exec(data.string)){
+					specialChars[i.index] = [i[0], i[1], i[2]];
+				}
+				for(i=0, len=data.string.length; i<len; i++){
 					var flag = true;
-					if(data.string[i] === specialSep[0]){
-						var slicedString = data.string.slice(i, i+specialSep.length);
-						if(slicedString == backspace){
-							string.unshift(slicedString);
-							i = i + backspace.length - 1;
+					for(index in specialChars){
+						var sp = specialChars[index];
+						if(index == i){
+							if(typeof sp[2] === 'undefined'){
+								string.unshift('/' + sp[1] + '/');
+							}else{
+								for(var j=0; j<+sp[2]; j++){
+									string.unshift('/' + sp[1] + '/');
+								}
+							}
 							flag = false;
-						}
-						if(slicedString == wait){
-							string.unshift('');
-							string.unshift('');
-							i = i + backspace.length - 1;
-							flag = false;
+							i = i + sp[0].length - 1;
 						}
 					}
 					if(flag){
@@ -71,10 +80,13 @@ var type;
 					'write': function(){
 						console.log("startが呼び出されました");
 						var chara = string.pop();
-						if(chara !== backspace){
+						if(typeof specialCharTable[chara] === 'undefined'){
 							$('#'+node).append(chara);
 						}else{
-							$('#'+node).text($('#'+node).text().slice(0, -1));
+							var result = specialCharTable[chara]($('#'+node));
+							if(typeof result === 'undefined'){
+								$('#'+node).append(result);
+							}
 						}
 						clear();
 					},
