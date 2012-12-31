@@ -1,109 +1,163 @@
-'use strict';
 
-var TypeWriter;
+(function(window){
+	'use strict';
 
-(function(){
-
-	var interval = 50;
-	var specialCharTable = {
-		'/bk/': function(node){	$(node).text($(node).text().slice(0, -1)); },
-		'/wt/': function(node){ return ''; },
-		'/sl/': function(node){ return '/'; }
-	};
-	
-	TypeWriter = (function(){
-		var queue = [];
-		var obj = {};
-		obj.status = function(){ console.log(queue); };
-		obj.add = function(node, string, param){
-			param = param || {};
-			var index = queue.length;
-			queue[index] = {
-				'node': node,
-				'string': string,
-				'interval': (typeof param.interval !== 'undefined') ? param.interval : interval,
-				'onStart': (typeof param.onStart !== 'undefined') ? param.onStart : null,
-				'onEnd': (typeof param.onEnd !== 'undefined') ? param.onEnd : null
+	// Variable declaration
+	var TypeWriter,
+		WritingProcess,
+		// Regular expressions
+		regex = {
+			// Match special characters
+			'specialChars': /\/(.+?):?([0-9]+)?\//g
+		},
+		// Called instead of showing special chars
+		specialCharsTable = {
+			'/bk/': function(node){	$(node).html($(node).html().slice(0, -1)); },
+			'/wt/': function(){ return ''; },
+			'/sls/': function(){ return '/'; },
+			'/br/': function(){  return '<br />';},
+			'/spd\+/': function(node, self){
+				self.data.interval--;
+				self.resetInterval();
+				self.write();
+			},
+			'/spd\-/': function(node, self){
+				self.data.interval++;
+				self.resetInterval();
+				self.write();
+			}
+		},
+		// Return the default parameters to call TypeWriter.add method with
+		getDefaultParameter = function(){
+			return {
+				'interval': 50,
+				'autostart': true,
+				'onStart': function(){},
+				'onWrite': function(){},
+				'onEnd': function(){}
 			};
-			if(typeof param.autostart === 'undefined' || param.autostart){
-				this.start(index);
-			}
 		};
-		obj.start = function(index){
-			if(typeof index === 'undefined') index = false;
-			var data = queue.pop();
-			var func = (function(){
-				var onEnd = data.onEnd;
-				var node = data.node;
-				var string = [];
-				var handler;
-				// string to array
-				var regexp = /\/(.+?):?([0-9]+)?\//g;
-				var i, index, len;
-				var specialChars = {};
-				while(i = regexp.exec(data.string)){
-					specialChars[i.index] = [i[0], i[1], i[2]];
-				}
-				for(i=0, len=data.string.length; i<len; i++){
-					var flag = true;
-					for(index in specialChars){
-						var sp = specialChars[index];
-						if(index == i){
-							if(typeof sp[2] === 'undefined'){
-								string.unshift('/' + sp[1] + '/');
-							}else{
-								for(var j=0; j<+sp[2]; j++){
-									string.unshift('/' + sp[1] + '/');
-								}
-							}
-							flag = false;
-							i = i + sp[0].length - 1;
-						}
-					}
-					if(flag){
-						string.unshift(data.string[i]);
-					}
-				}
-				// private function to clear setInterval
-				var clear = function(force){
-					if(typeof force === 'undefined') force = false;
-					if(typeof handler !== 'undefined' && (string.length == 0 || force)){
-						var a = clearInterval(handler);
-						console.log('clear', a, handler);
-						if(onEnd){
-							onEnd();
-						}
-					}
-				};
-				// public functions
-				return {
-					'write': function(){
-						console.log("startが呼び出されました");
-						var chara = string.pop();
-						if(typeof specialCharTable[chara] === 'undefined'){
-							$('#'+node).append(chara);
-						}else{
-							var result = specialCharTable[chara]($('#'+node));
-							if(typeof result !== 'undefined'){
-								$('#'+node).append(result);
-							}
-						}
-						clear();
-					},
-					'setHandler': function(h){
-						handler = h;
-						clear();
-					}
-				};
-			})();
-			if(data.onStart){
-				data.onStart();
-			}
-			var h = setInterval(func.write, data.interval);
-			func.setHandler(h);
-		};
-		return obj;
-	})();
 
-})();
+
+	// Constructor of this library's main class
+	TypeWriter = function(){
+		this.queue = [];
+	};
+	// Register data to queue and start procee if autoload property is not false
+	TypeWriter.prototype.register = function(node, string, param){
+		var i,
+			obj = getDefaultParameter(),
+			index = this.queue.length;
+		param = param || {};
+		for(i in param){
+			obj[i] = param[i];
+		}
+		obj.node = node;
+		obj.string = string;
+		this.queue[index] = obj;
+		if(obj.autostart){
+			return this.start(index);
+		}
+		return true;
+	};
+	// Pop queue and start typing
+	TypeWriter.prototype.start = function(){
+		var data = this.queue.pop();
+		if(typeof data !== 'undefined'){
+			var process = new WritingProcess(data);
+			process.start();
+			return process;
+		}else{
+			return false;
+		}
+	};
+
+
+	// Constructor of closure to return function for setInterval
+	WritingProcess = function(data){
+		this.data = data;
+		this.handler = null;
+	};
+	// Convert string to array
+	WritingProcess.prototype.convertStringToArray = function(){
+		var i, index, len,
+			string = this.data.string,
+			specialChars = {},
+			result = [];
+		while(i = regex.specialChars.exec(string)){
+			specialChars[i.index] = [i[0], i[1], i[2]];
+		}
+		for(i=0, len=string.length; i<len; i++){
+			var flag = true;
+			for(index in specialChars){
+				var sp = specialChars[index];
+				if(index == i){
+					if(typeof sp[2] === 'undefined'){
+						result.unshift('/' + sp[1] + '/');
+					}else{
+						for(var j=0; j<+sp[2]; j++){
+							result.unshift('/' + sp[1] + '/');
+						}
+					}
+					flag = false;
+					i = i + sp[0].length - 1;
+				}
+			}
+			if(flag){
+				result.unshift(string[i]);
+			}
+		}
+		return result;
+	};
+	// Start process
+	WritingProcess.prototype.start = function(){
+		this.stringArray = this.convertStringToArray();
+		if(typeof this.data.onStart === 'function'){
+			this.data.onStart(this);
+		}
+		var self = this;
+		var handler = window.setInterval(function(){ self.write(); }, this.data.interval);
+		this.handler = handler;
+	};
+	WritingProcess.prototype.resetInterval = function(){
+		window.clearInterval(this.handler);
+		var self = this;
+		var handler = window.setInterval(function(){ self.write(); }, this.data.interval);
+		this.handler = handler;
+	};
+	// Clear setInterval set to this process
+	WritingProcess.prototype.clearInterval = function(force){
+		if(typeof force === 'undefined') force = false;
+		if(this.stringArray.length == 0 || force){
+			window.clearInterval(this.handler);
+			if(typeof this.data.onEnd === 'function'){
+				this.data.onEnd(this);
+			}
+		}
+	};
+	// Write process called by setInterval
+	WritingProcess.prototype.write = function(){
+		var chara = this.stringArray.pop();
+		var selector = '#' + this.data.node;
+		var specialFunction = specialCharsTable[chara];
+		if(typeof specialFunction === 'undefined'){
+			$(selector).append(chara);
+		}else{
+			var result = specialFunction($(selector), this);
+			if(typeof result !== 'undefined'){
+				$(selector).append(result);
+			}
+		}
+		if(typeof this.data.onWrite === 'function'){
+			this.data.onWrite(this);
+		}
+		this.clearInterval();
+	};
+
+	// set TypeWriter to global object
+	window.TypeWriter = TypeWriter;
+
+})(window);
+
+
 

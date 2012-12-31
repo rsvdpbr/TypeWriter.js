@@ -5,20 +5,21 @@
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
   <script type="text/javascript" src="./typewriter.js"></script>
-  <script type="text/javascript">
-	window.onload = function(){
-	  var param = {
-	    'interval': 6,
-	    'onEnd': function(){ TypeWriter.start(); }
-	  };
-	  TypeWriter.add('type', 'JavaScript (sometimes abbreviated as JS) is a scripting language commonly implemented as part of a web browser in order to create enhanced user interfaces and dynamic websites. ', param);
-	  TypeWriter.add('type', 'JavaScript is a pr /bk:19/ (from wikiped/wt/i/wt/a/wt:2/)', {'autostart': false});
-	};
-  </script>
+  <script type="text/javascript" src="./sample.js"></script>
+  <style>
+	.type {
+	  border: 1px solid #aaa;
+	  padding: 8px;
+	  height: 130px;
+	  line-height: 26px;
+	}
+  </style>
 </head>
 <body>
-  <div id="type">
-	TypeWriter> 
+  <div style="width:800px; margin:32px auto; text-align:center;">
+	<h1 style="text-decoration:underline;">TypeWriter</h1>
+	<h2>what's this?</h2>
+	<div id="what" class="type"></div>
   </div>
 </body>
 </html>
