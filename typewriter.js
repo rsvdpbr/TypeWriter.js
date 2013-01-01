@@ -43,6 +43,7 @@
 			return {
 				'interval': 50,
 				'autostart': true,
+				'repeat': false,
 				'onStart': function(){},
 				'onWrite': function(){},
 				'onEnd': function(){}
@@ -143,6 +144,10 @@
 		if(this.stringArray.length == 0 || force){
 			window.clearInterval(this.handler);
 			this.data.onEnd(this);
+			if(this.data.repeat && !force){
+				$(this.node).empty();
+				this.start();
+			}
 		}
 	};
 	// Write process called by setInterval
