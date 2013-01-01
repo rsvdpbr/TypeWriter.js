@@ -8,7 +8,9 @@
 		// Regular expressions
 		regex = {
 			// Match special characters
-			'specialChars': /\/(.+?):?([0-9]+)?\//g
+			'getSpecialChars': function(){
+				return /\/(.+?):?([0-9]+)?\//g;
+			}
 		},
 		// String for delete mark
 		markString = '<!-- MARK -->',
@@ -36,6 +38,12 @@
 				self.data.interval++;
 				self.resetInterval();
 				self.write();
+			},
+			'/call/': function(node, self){
+				var nextString = self.stringArray.pop();
+				var funcname = (regex.getSpecialChars()).exec(nextString)[1];
+				var func = self.data[funcname];
+				return func(self);
 			}
 		},
 		// Return the default parameters to call TypeWriter.add method with
@@ -97,8 +105,9 @@
 		var i, index, len,
 			string = this.data.string,
 			specialChars = {},
-			result = [];
-		while(i = regex.specialChars.exec(string)){
+			result = [],
+			regexSpecialChars = regex.getSpecialChars();
+		while(i = regexSpecialChars.exec(string)){
 			specialChars[i.index] = [i[0], i[1], i[2]];
 		}
 		for(i=0, len=string.length; i<len; i++){
