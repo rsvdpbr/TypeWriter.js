@@ -88,6 +88,8 @@
 	WritingProcess = function(data){
 		this.data = data;
 		this.handler = null;
+		this.node = $('<span></span>');
+		$(this.data.node).append(this.node);
 	};
 	// Convert string to array
 	WritingProcess.prototype.convertStringToArray = function(){
@@ -123,13 +125,12 @@
 	// Start process
 	WritingProcess.prototype.start = function(){
 		this.stringArray = this.convertStringToArray();
-		if(typeof this.data.onStart === 'function'){
-			this.data.onStart(this);
-		}
+		this.data.onStart(this);
 		var self = this;
 		var handler = window.setInterval(function(){ self.write(); }, this.data.interval);
 		this.handler = handler;
 	};
+	// Reset interval for changing interval time
 	WritingProcess.prototype.resetInterval = function(){
 		window.clearInterval(this.handler);
 		var self = this;
@@ -141,27 +142,22 @@
 		if(typeof force === 'undefined') force = false;
 		if(this.stringArray.length == 0 || force){
 			window.clearInterval(this.handler);
-			if(typeof this.data.onEnd === 'function'){
-				this.data.onEnd(this);
-			}
+			this.data.onEnd(this);
 		}
 	};
 	// Write process called by setInterval
 	WritingProcess.prototype.write = function(){
 		var chara = this.stringArray.pop();
-		var selector = '#' + this.data.node;
 		var specialFunction = specialCharsTable[chara];
 		if(typeof specialFunction === 'undefined'){
-			$(selector).append(chara);
+			$(this.node).append(chara);
 		}else{
-			var result = specialFunction($(selector), this);
+			var result = specialFunction($(this.node), this);
 			if(typeof result !== 'undefined'){
-				$(selector).append(result);
+				$(this.node).append(result);
 			}
 		}
-		if(typeof this.data.onWrite === 'function'){
-			this.data.onWrite(this);
-		}
+		this.data.onWrite(this);
 		this.clearInterval();
 	};
 

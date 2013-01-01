@@ -7,7 +7,7 @@ window.onload = function(){
 	typewriter = new TypeWriter();
 
 	// node
-	var node ='what';
+	var node = $('#what');
 	// text
 	var text = 'This is javascript library for showing some text like type writer.'
 			+ '/br//wt:20/'
@@ -19,10 +19,10 @@ window.onload = function(){
 	var options = {
 		interval: 30,
 		onStart: function(process){
-			$('#' + process.data.node).css('backgroundColor', '#fdfdff');
+			$(process.data.node).css('backgroundColor', '#fdfdff');
 		},
 		onEnd: function(process){
-			$('#' + process.data.node).css('backgroundColor', '#fff');
+			$(process.data.node).css('backgroundColor', '#fff');
 		}
 	};
 
