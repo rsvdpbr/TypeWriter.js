@@ -10,9 +10,20 @@
 			// Match special characters
 			'specialChars': /\/(.+?):?([0-9]+)?\//g
 		},
+		// String for delete mark
+		markString = '<!-- MARK -->',
 		// Called instead of showing special chars
 		specialCharsTable = {
 			'/bk/': function(node){	$(node).html($(node).html().slice(0, -1)); },
+			'/mk/': function(){ return markString; },
+			'/bkmk/': function(node, self){
+				var html = $(node).html();
+				var deleteSection = html.split(markString).pop();
+				var length = deleteSection.length;
+				for(var i=0; i<length; i++){
+					self.stringArray.push('/bk/');
+				}
+			},
 			'/wt/': function(){ return ''; },
 			'/sls/': function(){ return '/'; },
 			'/br/': function(){  return '<br />';},

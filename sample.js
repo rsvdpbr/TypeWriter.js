@@ -11,8 +11,9 @@ window.onload = function(){
 	// text
 	var text = 'This is javascript library for showing some text like type writer.'
 			+ '/br//wt:20/'
-			+ 'feature1/wt:40//br/ special character to control/wt:40/ (ex./sls/bk:33/sls/ to delete chars like this)/wt:60//spd-:20//bk:34//spd+:20/'
-			+ '/wt:60//sls/spd-:80/sls/ for /spd-:80/typing speed down/spd-:80/ like this)/spd+:160//wt:40//spd-:20//bk:47//spd+:20/'
+			+ 'feature1/wt:40//br/ special character to control/wt:40/'
+			+ '/mk/ (ex./sls/bk:33/sls/ to delete chars like this)/wt:60//spd-:20//bk:34//spd+:20/'
+			+ '/wt:60//sls/spd-:80/sls/ for /spd-:80/typing speed down/spd-:80/ like this)/spd+:160//wt:40//spd-:20//bkmk//spd+:20/'
 			+ '/wt:20//br/feature2/wt:40//br/ comming soon ... (developing now)';
 	// options
 	var options = {
@@ -38,6 +39,8 @@ window.onload = function(){
 	 *  /spd+/   ... speed up
 	 *  /spd-/   ... speed down
 	 * 
+	 *  /mk/ ... /bkmk/  ... backspace to /mk/
+	 *
 	 *  /<XX>:<NUM>/ ... repeat /<XX>/ <NUM> times
 	 *                   ex) /bk:3/ -> /bk//bk//bk/
 	 * 
